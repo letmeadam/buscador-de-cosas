@@ -2,11 +2,8 @@
 A stable-ish Qt debugger for exploring UIs (originally created for Maya UI work)
 
 ## Setup
-#### enviroment.yaml
-```diff
-inherit:
-+- git+https://github.ps.thmulti.com/adam-lev/buscador_de_cosas.git?ref=master-v1.0.3
-```
+
+# TODO - Update from old setup to something like generic Rez
 
 ## Usage
 ```python
