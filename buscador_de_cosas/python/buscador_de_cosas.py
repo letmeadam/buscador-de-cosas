@@ -3,12 +3,16 @@ import textwrap
 
 # IMPORT THIRD-PARTY LIBRARIES
 from Qt import QtCore, QtGui, QtWidgets
-from mpc.tvcQtCore import constants, context_manager
 from six.moves import range
+
+# IMPORT LOCAL LIBRARIES
+import _constants
+import _decorators
+import _context_managers
 
 
 _USE_SPANISH = False  # type: bool
-ROOT_WIDGET = None  # type: QtWidgets.QWidget
+ROOT_WIDGET = None    # type: QtWidgets.QWidget
 
 
 class BuscadorDeCosasMenos(QtWidgets.QDialog):
@@ -66,7 +70,7 @@ class BuscadorDeCosasMenos(QtWidgets.QDialog):
         # Widget Tree
         tree_widget = QtWidgets.QWidget()
         tree_layout = QtWidgets.QVBoxLayout()
-        tree_layout.setContentsMargins(constants.NO_MARGINS)
+        tree_layout.setContentsMargins(_constants.NO_MARGINS)
         tree_layout.setSpacing(0)
         tree_widget.setLayout(tree_layout)
 
@@ -80,7 +84,7 @@ class BuscadorDeCosasMenos(QtWidgets.QDialog):
         style_modification_title = "Modificacion de Estilo" if _USE_SPANISH else "Style Modification"
         style_group_box = QtWidgets.QGroupBox(style_modification_title)
         style_group_layout = QtWidgets.QGridLayout()
-        style_group_layout.setContentsMargins(constants.NO_MARGINS)
+        style_group_layout.setContentsMargins(_constants.NO_MARGINS)
         style_group_layout.setSpacing(2)
         style_group_box.setLayout(style_group_layout)
 
@@ -117,7 +121,7 @@ class BuscadorDeCosasMenos(QtWidgets.QDialog):
         interaction_title = "Interaccion de Cosa" if _USE_SPANISH else "Widget Interaction"
         widget_group_box = QtWidgets.QGroupBox(interaction_title)
         widget_group_layout = QtWidgets.QGridLayout()
-        widget_group_layout.setContentsMargins(constants.NO_MARGINS)
+        widget_group_layout.setContentsMargins(_constants.NO_MARGINS)
         widget_group_layout.setSpacing(2)
         widget_group_box.setLayout(widget_group_layout)
 
@@ -168,12 +172,12 @@ class BuscadorDeCosasMenos(QtWidgets.QDialog):
 
         self._refresh_button.clicked.connect(self.refresh)
 
-    @context_manager.cursor_override_decorator()
+    @_decorators.cursor_override_decorator()
     def _populate_model(self):
         # type: () -> None
         # If refreshing, undo style alterations first.
         if self._tree.model():
-            preserve_current_saved_context = context_manager.block_callbacks(
+            preserve_current_saved_context = _context_managers.disconnect_temporarily(
                 [(self._tree.selectionModel().selectionChanged, self._save_current_index)]
             )
             with preserve_current_saved_context:

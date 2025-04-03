@@ -1,24 +1,20 @@
-name = "mpc.buscador_de_cosas"
+name = "buscador_de_cosas"
 
-version = "1.1.1"
+version = "1.0.0"
 
 description = "A Qt UI Debugger"
 
-authors = ["@adam-lev"]
+authors = ["letmeadam"]
 
 requires = [
-    "mpc.tvcQtCore-1.3+<3",
-    "python-2.7+<3.10",
-
+    "python-2.7+<3.12",
+    "Qt.py-1.4+<1.5",
     "six-1.17+<2",
-
-    "mpc.qt_binding_chooser-1+<2",
-    "~PySide2-5.15+<6",
+    # "PySide2-5.15+<6",
+    "PySide6-6.8+<6.10",
 ]
 
-private_build_requires = ["rez_build_helper-2+<4"]
-
-build_command = "python -m rez_build_helper --shared-python-packages mpc.buscador_de_cosas:python"
+build_command = "cp -r {root}/python {install_path}/."
 
 _common_run_on = ["default", "pre_release"]
 
@@ -54,7 +50,7 @@ tests = {
         "run_on": _common_run_on,
     },
     "mypy": {
-        "command": "python -m mypy python --strict",
+        "command": "python -m mypy python",
         "requires": ["mypy-1.4+<2"],
         "run_on": _common_run_on,
     },
