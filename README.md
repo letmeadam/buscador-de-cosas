@@ -18,7 +18,7 @@ from buscador_de_cosas import buscador_de_cosas
 
 widget = MyWidgetToDebug()
 
-ui_debugger = buscador_de_cosas.BuscadorDeCosaMenos(parent=widget)
+ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=widget)
 ui_debugger.show()
 
 ####### Optional Setup #######
@@ -26,15 +26,15 @@ ui_debugger.show()
 ui_debugger.resize(500, 800)
 
 # Start with a given stylesheet
-ui_debugger.style_edit.setPlainText("QWidget { color: green; }")
+ui_debugger.set_style("QWidget { color: green; }")
 
 # Turn off automatic stylesheet application
 ui_debugger.clear_style()
 
 # Start with the parent selected
-ui_debugger._last_selected_widgets = [widget]
+ui_debugger.select_widget(widget)
 
 # Refresh immediately (some applications take time to fully load)
-ui_debugger.refresh_button.clicked.emit()
+ui_debugger.refresh()
 
 ```

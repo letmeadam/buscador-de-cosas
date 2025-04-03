@@ -1,4 +1,4 @@
-name = "buscador_de_cosas"
+name = "buscador_de_cosas_base"
 
 version = "1.0.0"
 

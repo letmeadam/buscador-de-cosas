@@ -1,6 +1,6 @@
-from _typeshed import Incomplete
-from buscador_de_cosas import buscador_de_cosas
+import buscador_de_cosas_base
 
-class BuscadorDeCosas(buscador_de_cosas.BuscadorDeCosasMenos):
+
+class BuscadorDeCosasHoudini(buscador_de_cosas_base.BuscadorDeCosas):
     pass
 

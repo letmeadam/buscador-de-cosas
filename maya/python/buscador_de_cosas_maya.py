@@ -1,12 +1,12 @@
 # IMPORT THIRD-PARTY LIBRARIES
-from mpc.tvcUtils.maya import dialogs
-from mpc.tvcUtils.maya import maya_ui
+# import dialogs
+# import maya_ui
 
 # IMPORT LOCAL LIBRARIES
-from buscador_de_cosas import buscador_de_cosas
+import buscador_de_cosas_base
 
 
-class BuscadorDeCosas(buscador_de_cosas.BuscadorDeCosasMenos):
+class BuscadorDeCosas(buscador_de_cosas_base.BuscadorDeCosas):
 
     def show(self):
         # type: () -> None

@@ -15,7 +15,7 @@ _USE_SPANISH = False  # type: bool
 ROOT_WIDGET = None    # type: QtWidgets.QWidget
 
 
-class BuscadorDeCosasMenos(QtWidgets.QDialog):
+class BuscadorDeCosas(QtWidgets.QDialog):
 
     _spanish_headers = ("Clase", "Nombre", "Tipo", "Hijos")
     # type: typing.Iterable[str]
@@ -29,13 +29,13 @@ class BuscadorDeCosasMenos(QtWidgets.QDialog):
     def __init__(self, parent=None):
         # type: (typing.Optional[QtWidgets.QWidget]) -> None
         global ROOT_WIDGET
-        super(BuscadorDeCosasMenos, self).__init__(parent=parent)
+        super(BuscadorDeCosas, self).__init__(parent=parent)
         self.setObjectName("buscadorDeCosa")
         ROOT_WIDGET = self if parent is None else parent
 
         self._error_display = False
 
-        self.setWindowTitle("Buscador de Cosa (Menos)")
+        self.setWindowTitle("Buscador de Cosas (unattached)")
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         title = "Nombre de esta cosa" if _USE_SPANISH else "Name of this Widget"
@@ -433,7 +433,7 @@ def main():
     # TODO: Allow a "--spanish" flag to alter the _USE_SPANISH global
     app = QtWidgets.QApplication(sys.argv)
 
-    buscador = BuscadorDeCosasMenos()
+    buscador = BuscadorDeCosas()
     buscador.show()
 
     return app.exec_()

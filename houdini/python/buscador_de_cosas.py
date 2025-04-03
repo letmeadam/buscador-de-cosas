@@ -2,13 +2,13 @@
 import hou
 
 # IMPORT LOCAL LIBRARIES
-from buscador_de_cosas import buscador_de_cosas
+import buscador_de_cosas_base
 
 
-class BuscadorDeCosas(buscador_de_cosas.BuscadorDeCosasMenos):
+class BuscadorDeCosasHoudini(buscador_de_cosas_base.BuscadorDeCosas):
     pass
 
 
 pythonPanelRegistry().registerPanel(panel_name='BuscadorDeCosas', panel_class=BuscadorDeCosas)
-window = BuscadorDeCosas(parent=hou.qt.mainWindow())
+window = BuscadorDeCosasHoudini(parent=hou.qt.mainWindow())
 window.show()
