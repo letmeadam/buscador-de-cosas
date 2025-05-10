@@ -2,12 +2,11 @@
 import contextlib
 import typing
 
-# IMPORT THIRD-PARTY LIBRARIES
-from Qt import QtCore, QtWidgets
-
-
 if typing.TYPE_CHECKING:
     import collections
+
+    # IMPORT THIRD-PARTY LIBRARIES
+    from Qt import QtCore, QtWidgets
 
 
 def _get_signals_blocked_status(widget):

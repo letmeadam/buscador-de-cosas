@@ -2,7 +2,6 @@ import textwrap
 
 from Qt import QtCore, QtWidgets
 
-
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
     app.setPalette(app.style().standardPalette())
@@ -32,9 +31,9 @@ if __name__ == "__main__":
     window.show()
 
     # -------
-    import buscador_de_cosas
+    from buscador_de_cosas import buscador_de_cosas
 
-    ui_debugger = buscador_de_cosas.BuscadorDeCosasMenos(parent=window)
+    ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=window)
 
     ui_debugger.set_style(
         textwrap.dedent(
