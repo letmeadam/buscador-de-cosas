@@ -185,6 +185,7 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         self._error_checkbox.setChecked(True)
 
         self._refresh_button.clicked.connect(self.refresh)
+        self.resize(500, 800)
 
     @_decorators.cursor_override_decorator()
     def _populate_model(self):

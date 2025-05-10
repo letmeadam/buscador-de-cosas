@@ -2,10 +2,8 @@ import textwrap
 
 from Qt import QtCore, QtWidgets
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    app.setPalette(app.style().standardPalette())
 
+def _create_main_window():
     window = QtWidgets.QMainWindow()
     central_widget = QtWidgets.QWidget()
     window.setCentralWidget(central_widget)
@@ -28,16 +26,22 @@ if __name__ == "__main__":
     sub_layout.addWidget(close_button)
 
     central_widget.setLayout(layout)
-    window.show()
+    return window
 
-    # -------
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication([])
+    app.setPalette(app.style().standardPalette())
+
+    window = _create_main_window()
+
+    # Import now that a QApplication has been established.
     from buscador_de_cosas import buscador_de_cosas
 
     ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=window)
-
     ui_debugger.set_style(
         textwrap.dedent(
-            """
+            """\
                 QPushButton:hover {
                     border: 1px solid transparent;
                     border-radius: 0px;  /* border-color corners aren't very smart */
@@ -50,13 +54,13 @@ if __name__ == "__main__":
                         cx: 0.5, cy: 0.5, radius: 1, fx: 0.5, fy: 0.5,
                         stop: 1 palette(base), stop: 0 palette(alternate-base)
                     );
-                }
+                }\
             """
         )
     )
     ui_debugger.refresh()
-    ui_debugger.select_widget(central_widget)
-    ui_debugger.resize(500, 800)
+    ui_debugger.select_widget(window.centralWidget())
 
+    window.show()
     ui_debugger.show()
     app.exec()

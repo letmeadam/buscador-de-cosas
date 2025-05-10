@@ -3,11 +3,6 @@ A stable-ish Qt debugger for exploring UIs (originally created for Maya UI work)
 
 ## Setup
 
-- [ ] TODO - Update from old setup to something like generic Rez
-   - [x] Base code
-   - [ ] Maya code
-   - [ ] Houdini code
-
 
 ## Usage
 ```python

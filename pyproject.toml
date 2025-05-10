@@ -29,11 +29,5 @@ license-files = ["LICEN[CS]E*"]
 Homepage = "https://github.com/letmeadam/buscador-de-cosas"
 Issues = "https://github.com/letmeadam/buscador-de-cosas/issues"
 
-[tool.setuptools]
-packages = ["buscador_de_cosas", "buscador_de_cosas.maya", "buscador_de_cosas.houdini"]
 
-[tool.setuptools.package-dir]
-buscador_de_cosas = "base/python"
-"buscador_de_cosas.maya" = "maya/python"
-"buscador_de_cosas.houdini" = "houdini/python"
 
