@@ -3,10 +3,11 @@ A stable-ish Qt debugger for exploring UIs (originally created for Maya UI work)
 
 ## Setup
 
+*IMPORTANT* For this runtime debugger to work, there must already be a QMainWindow that exists (see `examples/simple.py` for a standalone example)
 
 ## Usage
-```python
 
+```python
 from buscador_de_cosas import buscador_de_cosas
 
 # ...
@@ -31,5 +32,4 @@ ui_debugger.select_widget(widget)
 
 # Refresh immediately (some applications take time to fully load)
 ui_debugger.refresh()
-
 ```
