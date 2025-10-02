@@ -1,13 +1,13 @@
 import textwrap
 
 import hou
-from buscador_de_cosas import buscador_de_cosas
+import cosas
 
 
 def run():
     houdini_window = hou.qt.mainWindow()
 
-    ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=houdini_window)
+    ui_debugger = cosas.BuscadorDeCosas(parent=houdini_window)
     ui_debugger.set_style(
         textwrap.dedent(
             """\

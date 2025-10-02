@@ -36,9 +36,9 @@ if __name__ == "__main__":
     window = _create_main_window()
 
     # Import now that a QApplication has been established.
-    from buscador_de_cosas import buscador_de_cosas
+    import cosas
 
-    ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=window)
+    ui_debugger = cosas.BuscadorDeCosas(parent=window)
     ui_debugger.set_style(
         textwrap.dedent(
             """\

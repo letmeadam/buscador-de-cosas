@@ -3,7 +3,7 @@ requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "buscador_de_cosas"
+name = "cosas"
 version = "1.0.0"
 authors = [
     { name="Adam Levasseur", email="letmeadam@gmail.com" },
@@ -12,7 +12,7 @@ dependencies = [
     "Qt.py < 1.4.4",
     "six >= 1.17",
     # "PySide2-5.15+<6",
-    "PySide6 >= 6.8",
+    # "PySide6 >= 6.8",
 ]
 description = "A Qt UI runtime debugger"
 readme = "README.md"
@@ -29,5 +29,6 @@ license-files = ["LICEN[CS]E*"]
 Homepage = "https://github.com/letmeadam/buscador-de-cosas"
 Issues = "https://github.com/letmeadam/buscador-de-cosas/issues"
 
-
+[tools.setuptools.packages.find]
+include = ["cosas"]
 

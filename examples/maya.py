@@ -4,7 +4,7 @@ import shiboken
 from Qt import QtWidgets
 from maya import OpenMayaUI
 
-from buscador_de_cosas import buscador_de_cosas
+import cosas
 
 
 def _get_maya_main_window():
@@ -17,7 +17,7 @@ def _get_maya_main_window():
 def run():
     maya_window = _get_maya_main_window()
 
-    ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=maya_window)
+    ui_debugger = cosas.BuscadorDeCosas(parent=maya_window)
     ui_debugger.set_style(
         textwrap.dedent(
             """\

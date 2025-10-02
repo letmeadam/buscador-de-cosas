@@ -8,13 +8,13 @@ A stable-ish Qt debugger for exploring UIs (originally created for Maya UI work)
 ## Usage
 
 ```python
-from buscador_de_cosas import buscador_de_cosas
+import cosas
 
 # ...
 
 widget = MyWidgetToDebug()
 
-ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=widget)
+ui_debugger = cosas.BuscadorDeCosas(parent=widget)
 ui_debugger.show()
 
 ####### Optional Setup #######
