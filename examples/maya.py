@@ -4,7 +4,7 @@ import shiboken
 from Qt import QtWidgets
 from maya import OpenMayaUI
 
-from buscador_de_cosas import buscador_de_cosas
+import buscador_de_cosas
 
 
 def _get_maya_main_window():

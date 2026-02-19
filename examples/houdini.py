@@ -1,7 +1,7 @@
 import textwrap
 
 import hou
-from buscador_de_cosas import buscador_de_cosas
+import buscador_de_cosas
 
 
 def run():
