@@ -474,6 +474,11 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         # type: (bool) -> None
         self._error_display = checkstate == QtCore.Qt.Checked
 
+    def show(self):
+        # type: () -> None
+        self.refresh()
+        super(BuscadorDeCosas, self).show()
+
 
 def _normalize_class_name(class_name):
     class_name = class_name.replace("PySide2.", "")
