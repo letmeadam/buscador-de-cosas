@@ -187,6 +187,12 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         self._refresh_button.clicked.connect(self.refresh)
         self.resize(500, 800)
 
+    def keyPressEvent(self, event):
+        # type: (Qt.QtGui.QKeyEvent) -> None
+        # Disable Escape key from closing the dialog window.
+        if event.key() != QtCore.Qt.Key_Escape:
+            super(BuscadorDeCosas, self).keyPressEvent(event)
+
     @_decorators.cursor_override_decorator()
     def _populate_model(self):
         # type: () -> None
