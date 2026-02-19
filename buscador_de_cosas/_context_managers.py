@@ -43,17 +43,17 @@ def disconnect_temporarily(callbacks_tuples):
 @contextlib.contextmanager
 def block_signals(widgets):
     # type: (collections.abc.Iterable[QtWidgets.QWidget]) -> typing.Generator[None, None, None]
-    blocked_statuses = map(_get_signals_blocked_status, widgets)
+    blocked_statuses = dict(map(_get_signals_blocked_status, widgets))
 
     try:
-        for widget, signals_blocked in blocked_statuses:
+        for widget, signals_blocked in blocked_statuses.items():
             if signals_blocked is None:
                 continue
 
             widget.blockSignals(True)
         yield
     finally:
-        for widget, signals_blocked in blocked_statuses:
+        for widget, signals_blocked in blocked_statuses.items():
             if signals_blocked is None:
                 continue
 
