@@ -6,7 +6,7 @@ if typing.TYPE_CHECKING:
     import collections
 
     # IMPORT THIRD-PARTY LIBRARIES
-    from Qt import QtCore, QtWidgets
+    from Qt import QtCore, QtGui, QtWidgets
 
 
 def _get_signals_blocked_status(widget):
@@ -58,3 +58,14 @@ def block_signals(widgets):
                 continue
 
             widget.blockSignals(signals_blocked)
+
+
+@contextlib.contextmanager
+def preserved_painter(painter):
+    # type: (QtGui.QPainter) -> typing.Generator[None, None, None]
+    painter.save()
+    try:
+        yield
+    finally:
+        painter.restore()
+

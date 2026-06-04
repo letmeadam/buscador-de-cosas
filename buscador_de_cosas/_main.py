@@ -6,17 +6,55 @@ from Qt import QtCore, QtGui, QtWidgets
 from six.moves import range
 
 # IMPORT LOCAL LIBRARIES
-from . import _constants, _context_managers, _decorators
+from . import (
+    _constants,
+    _context_managers,
+    _decorators,
+    _delegates,
+)
 
 _USE_SPANISH = False  # type: bool
 ROOT_WIDGET = None  # type: QtWidgets.QWidget
 
 
+def _recursively_open_persistent_editors(tree_view, parent=None):
+    # type: (QtWidgets.QTreeView, QtCore.QModelIndex) -> None
+    """
+    Iteratively open persistent editors for all valid indices in the tree view.
+    Avoids recursion to prevent stack overflow and segmentation faults.
+    """
+    if not tree_view or not tree_view.model():
+        return
+
+    model = tree_view.model()
+    stack = [parent]
+
+    while stack:
+        current_parent = stack.pop()
+        if current_parent is None:
+            current_parent = QtCore.QModelIndex()
+        elif not current_parent.isValid():
+            continue
+
+        num_rows = model.rowCount(current_parent)
+        for row in range(num_rows):
+            index = model.index(row, 0, current_parent)
+            if not index.isValid():
+                continue
+
+            if hasattr(tree_view, "openPersistentEditor"):
+                tree_view.openPersistentEditor(index)
+
+            # Add children to the stack for further processing
+            if model.hasChildren(index):
+                stack.append(index)
+
+
 class BuscadorDeCosas(QtWidgets.QDialog):
-    _spanish_headers = ("Clase", "Nombre", "Tipo", "Hijos")
+    _spanish_headers = ("Clase", )
     # type: typing.Iterable[str]
 
-    _english_headers = ("Class", "ObjectName", "ObjectType", "Children")
+    _english_headers = ("Class", )
     # type: typing.Iterable[str]
 
     column_headers = _spanish_headers if _USE_SPANISH else _english_headers
@@ -58,6 +96,25 @@ class BuscadorDeCosas(QtWidgets.QDialog):
                 }
                 QSplitter::handle:vertical {
                     height: 15px;
+                }
+                QWidget#delegate_widget {
+                    background-color: transparent;
+                    border: 0px solid transparent;
+                    padding: 2px;
+                    padding-left: 0px;
+                }
+                QWidget#delegate_widget > QLabel {
+                    padding-left: 2px;
+                }
+                QWidget#delegate_widget > QLabel#secondary_label,
+                QWidget#delegate_widget > QLabel#primary_alt_label {
+                    color: palette(highlighted-text);
+                    font-family: "Courier New";
+                    font-size: 12px;
+                }
+                QWidget#delegate_widget > QLabel#secondary_label,
+                QWidget#delegate_widget > QLabel#secondary_alt_label {
+                    color: palette(placeholder-text);
                 }\
             """
         )
@@ -71,6 +128,8 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         tree_widget.setLayout(tree_layout)
 
         self._tree = QtWidgets.QTreeView()
+        self._tree.setAlternatingRowColors(True)
+        self._tree.setItemDelegateForColumn(0, _delegates.TreeDelegate(parent=self._tree))
         tree_layout.addWidget(self._tree, stretch=1)
 
         self._refresh_button = QtWidgets.QPushButton("Refresh")
@@ -242,17 +301,12 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         class_name_str = _normalize_class_name(class_name_str)
 
         name_item = QtGui.QStandardItem(class_name_str)
-        name_item.setData(widget, role=QtCore.Qt.UserRole)
+        name_item.setData(widget, role=_constants.WIDGET_ROLE)
+        name_item.setData(widget.objectName(), role=_constants.OBJECT_NAME_ROLE)
+        name_item.setData(str(len(widget.children())), role=_constants.NUM_CHILDREN_ROLE)
+        name_item.setEditable(False)
 
-        type_item = QtGui.QStandardItem(str(type(widget)))
-        type_item.setData(type(widget), role=QtCore.Qt.UserRole)
-
-        items = [
-            name_item,
-            QtGui.QStandardItem(widget.objectName()),
-            type_item,
-            QtGui.QStandardItem(str(len(widget.children()))),
-        ]
+        items = [name_item]
         parent_item.appendRow(items)
 
         # Recurse children and perform the same action
@@ -277,10 +331,10 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         temp_index = tree_model.index(
             selected_row, 0, self._last_selected_index.parent()
         )
-        self._last_selected_widgets.append(temp_index.data(QtCore.Qt.UserRole))
+        self._last_selected_widgets.append(temp_index.data(_constants.WIDGET_ROLE))
         while temp_index.parent().isValid():
             temp_index = temp_index.parent()
-            self._last_selected_widgets.insert(0, temp_index.data(QtCore.Qt.UserRole))
+            self._last_selected_widgets.insert(0, temp_index.data(_constants.WIDGET_ROLE))
 
     def _attempt_reselect(self):
         # type: () -> None
@@ -317,7 +371,7 @@ class BuscadorDeCosas(QtWidgets.QDialog):
 
         for row_index in range(tree_model.rowCount(parent=parent_index)):
             child_index = tree_model.index(row_index, 0, parent_index)
-            child_user_data = tree_model.data(child_index, QtCore.Qt.UserRole)
+            child_user_data = tree_model.data(child_index, _constants.WIDGET_ROLE)
             if user_data == child_user_data:
                 return child_index
 
@@ -341,6 +395,7 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         # type: () -> None
         """Refresh the debugger."""
         self._populate_model()
+        _recursively_open_persistent_editors(self._tree)
 
     def select_widget(self, widget=None):
         # type: (typing.Optional[QtWidgets.QWidget]) -> None
@@ -378,7 +433,7 @@ class BuscadorDeCosas(QtWidgets.QDialog):
 
     def _update_style(self):
         # type: () -> None
-        if self._style_apply_checkbox.checkState() or self._style_apply_button.isFlat():
+        if self._style_apply_checkbox.isChecked() or self._style_apply_button.isFlat():
             self._set_style()
 
     def _reapply_style(self, selected, deselected):
@@ -400,9 +455,11 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         self._unset_style()
 
         try:
-            self.current_widget = item.data(role=QtCore.Qt.UserRole)
-            self._saved_style = self.current_widget.styleSheet()
+            self.current_widget = item.data(role=_constants.WIDGET_ROLE)
+            if not hasattr(self.current_widget, "styleSheet"):
+                raise AttributeError
 
+            self._saved_style = self.current_widget.styleSheet()
             self.current_widget.setStyleSheet(self._style_edit.toPlainText())
         except AttributeError:
             if _USE_SPANISH:
@@ -423,6 +480,9 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         # type: () -> None
         if self.current_widget:
             try:
+                if not hasattr(self.current_widget, "setStyleSheet"):
+                    raise AttributeError
+
                 self.current_widget.setStyleSheet(self._saved_style)
             except AttributeError:
                 if _USE_SPANISH:
@@ -452,7 +512,7 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         index = indices[0]
         widget_item = self._tree.model().itemFromIndex(index)
         # type_item = self._tree.model().itemFromIndex(index.sibling(index.row(), 2))
-        WIDGET = widget_item.data(role=QtCore.Qt.UserRole)  # noqa: N806 (for user-side macro)
+        WIDGET = widget_item.data(role=_constants.WIDGET_ROLE)  # noqa: N806 (for user-side macro)
 
         print("[DEBUG] WIDGET: {}".format(WIDGET))
         if WIDGET:
