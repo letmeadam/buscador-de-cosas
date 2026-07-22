@@ -13,7 +13,6 @@ from . import (
     _delegates,
 )
 
-_USE_SPANISH = False  # type: bool
 ROOT_WIDGET = None  # type: QtWidgets.QWidget
 
 
@@ -51,15 +50,6 @@ def _recursively_open_persistent_editors(tree_view, parent=None):
 
 
 class BuscadorDeCosas(QtWidgets.QDialog):
-    _spanish_headers = ("Clase", )
-    # type: typing.Iterable[str]
-
-    _english_headers = ("Class", )
-    # type: typing.Iterable[str]
-
-    column_headers = _spanish_headers if _USE_SPANISH else _english_headers
-    # type: typing.Iterable[str]
-
     def __init__(self, parent=None):
         # type: (typing.Optional[QtWidgets.QWidget]) -> None
         global ROOT_WIDGET
@@ -69,10 +59,13 @@ class BuscadorDeCosas(QtWidgets.QDialog):
 
         self._error_display = False
 
-        self.setWindowTitle("Buscador de Cosas (unattached)")
+        self.column_headers = (self.tr("Class"), )
+        # type: typing.Iterable[str]
+
+        self.setWindowTitle(self.tr("Buscador de Cosas (unattached)"))
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        title = "Nombre de esta cosa" if _USE_SPANISH else "Name of this Widget"
+        title = self.tr("Name of this Widget")
         self.title_label = QtWidgets.QLabel("{}: {}".format(title, self.objectName()))
         # type: QtWidgets.QLabel
 
@@ -132,29 +125,26 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         self._tree.setItemDelegateForColumn(0, _delegates.TreeDelegate(parent=self._tree))
         tree_layout.addWidget(self._tree, stretch=1)
 
-        self._refresh_button = QtWidgets.QPushButton("Refresh")
+        self._refresh_button = QtWidgets.QPushButton(self.tr("Refresh"))
         tree_layout.addWidget(self._refresh_button)
 
         # Style Modifications
-        style_modification_title = (
-            "Modificacion de Estilo" if _USE_SPANISH else "Style Modification"
-        )
-        style_group_box = QtWidgets.QGroupBox(style_modification_title)
+        style_group_box = QtWidgets.QGroupBox(self.tr("Style Modification"))
         style_group_layout = QtWidgets.QGridLayout()
         style_group_layout.setContentsMargins(_constants.NO_MARGINS)
         style_group_layout.setSpacing(2)
         style_group_box.setLayout(style_group_layout)
 
-        self._style_apply_button = QtWidgets.QPushButton("Apply")
+        self._style_apply_button = QtWidgets.QPushButton(self.tr("Apply"))
         self._style_apply_button.setToolTip(
-            "Apply style modification to current widget(s), once."
+            self.tr("Apply style modification to current widget(s), once.")
         )
         style_group_layout.addWidget(self._style_apply_button, 0, 0)
 
         self._style_apply_checkbox = QtWidgets.QCheckBox("")
         self._style_apply_checkbox.setObjectName("apply_checkbox")
         self._style_apply_checkbox.setToolTip(
-            "Toggle constant style modification to current widget(s)."
+            self.tr("Toggle constant style modification to current widget(s).")
         )
         style_group_layout.addWidget(
             self._style_apply_checkbox,
@@ -163,9 +153,9 @@ class BuscadorDeCosas(QtWidgets.QDialog):
             alignment=QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter,
         )
 
-        self._style_clear_button = QtWidgets.QPushButton("Clear")
+        self._style_clear_button = QtWidgets.QPushButton(self.tr("Clear"))
         self._style_clear_button.setToolTip(
-            "Clear style on currently affected widget(s)."
+            self.tr("Clear style on currently affected widget(s).")
         )
         style_group_layout.addWidget(self._style_clear_button, 0, 1)
 
@@ -184,23 +174,20 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         style_group_layout.setRowStretch(1, 1)
 
         # Widget Interaction
-        interaction_title = (
-            "Interaccion de Cosa" if _USE_SPANISH else "Widget Interaction"
-        )
-        widget_group_box = QtWidgets.QGroupBox(interaction_title)
+        widget_group_box = QtWidgets.QGroupBox(self.tr("Widget Interaction"))
         widget_group_layout = QtWidgets.QGridLayout()
         widget_group_layout.setContentsMargins(_constants.NO_MARGINS)
         widget_group_layout.setSpacing(2)
         widget_group_box.setLayout(widget_group_layout)
 
-        self._widget_apply_button = QtWidgets.QPushButton("Apply")
-        self._widget_apply_button.setToolTip("Run code on current widget, once.")
+        self._widget_apply_button = QtWidgets.QPushButton(self.tr("Apply"))
+        self._widget_apply_button.setToolTip(self.tr("Run code on current widget, once."))
         widget_group_layout.addWidget(self._widget_apply_button, 0, 0)
 
-        self._error_checkbox = QtWidgets.QCheckBox("show errors")
+        self._error_checkbox = QtWidgets.QCheckBox(self.tr("show errors"))
         self._error_checkbox.setObjectName("error_checkbox")
         self._error_checkbox.setToolTip(
-            "Show errors raised from running code on current widget."
+            self.tr("Show errors raised from running code on current widget.")
         )
         widget_group_layout.addWidget(
             self._error_checkbox,
@@ -211,8 +198,10 @@ class BuscadorDeCosas(QtWidgets.QDialog):
 
         self._widget_edit = QtWidgets.QTextEdit("")
         self._widget_edit.setPlaceholderText(
-            'Use "WIDGET" or "RAW_WIDGET" to reference currently selected widget.\n'
-            r'i.e. print"\{\}".format(RAW_WIDGET.objectName())'
+            self.tr(
+                'Use "WIDGET" or "RAW_WIDGET" to reference currently selected widget.\n'
+                r'i.e. print"\{\}".format(RAW_WIDGET.objectName())'
+            )
         )
         widget_group_layout.addWidget(self._widget_edit, 1, 0)
         widget_group_layout.setRowStretch(1, 1)
@@ -462,18 +451,11 @@ class BuscadorDeCosas(QtWidgets.QDialog):
             self._saved_style = self.current_widget.styleSheet()
             self.current_widget.setStyleSheet(self._style_edit.toPlainText())
         except AttributeError:
-            if _USE_SPANISH:
-                print(
-                    '(set) "{}" no comprende "styleSheet" :('.format(
-                        item.data(role=QtCore.Qt.DisplayRole)
-                    )
+            print(
+                self.tr('(set) "{}" can not understand the current "styleSheet" :(').format(
+                    item.data(role=QtCore.Qt.DisplayRole)
                 )
-            else:
-                print(
-                    '(set) "{}" can not understand the current "styleSheet" :('.format(
-                        item.data(role=QtCore.Qt.DisplayRole)
-                    )
-                )
+            )
             self._saved_style = ""
 
     def _unset_style(self):
@@ -485,18 +467,11 @@ class BuscadorDeCosas(QtWidgets.QDialog):
 
                 self.current_widget.setStyleSheet(self._saved_style)
             except AttributeError:
-                if _USE_SPANISH:
-                    print(
-                        '(unset) "{}" no comprende "styleSheet" :('.format(
-                            self.current_widget
-                        )
-                    )
-                else:
-                    print(
-                        '(unset) "{}" can not understand the current "styleSheet" :('.format(
-                            self.current_widget
-                        )
-                    )
+                print(
+                    self.tr(
+                        '(unset) "{}" can not understand the current "styleSheet" :('
+                    ).format(self.current_widget)
+                )
             finally:
                 self.current_widget = None
                 self._saved_style = ""
@@ -519,14 +494,11 @@ class BuscadorDeCosas(QtWidgets.QDialog):
             try:
                 exec(self._widget_edit.toPlainText())
             except Exception as error:
-                if _USE_SPANISH:
-                    print('(widget) "{}" no entiende :('.format(WIDGET))
-                else:
-                    print(
-                        '(widget) "{}" does not understand the executed code :('.format(
-                            WIDGET
-                        )
+                print(
+                    self.tr('(widget) "{}" does not understand the executed code :(').format(
+                        WIDGET
                     )
+                )
                 if self._error_display:
                     print(error)
 
@@ -554,7 +526,8 @@ def main():
     """Create the Maya Qt Debugger GUI and show it."""
     import sys  # noqa: PLC0415
 
-    # TODO: Allow a "--spanish" flag to alter the _USE_SPANISH global
+    # NOTE: UI strings are wrapped in self.tr(...); install a QTranslator
+    # loaded from a compiled .qm file here to localize them.
     app = QtWidgets.QApplication(sys.argv)
 
     buscador = BuscadorDeCosas()
