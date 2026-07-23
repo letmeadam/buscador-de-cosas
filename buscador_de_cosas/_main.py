@@ -1,4 +1,5 @@
 # IMPORT STANDARD LIBRARIES
+import os
 import textwrap
 
 # IMPORT THIRD-PARTY LIBRARIES
@@ -11,6 +12,7 @@ from . import (
     _context_managers,
     _decorators,
     _delegates,
+    _widgets,
 )
 
 ROOT_WIDGET = None  # type: QtWidgets.QWidget
@@ -70,6 +72,21 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         # type: QtWidgets.QLabel
 
         self.title_label.setObjectName("title_label")
+
+        self._language_switch_widget = QtWidgets.QWidget()
+        language_switch_layout = QtWidgets.QHBoxLayout()
+        language_switch_layout.setContentsMargins(_constants.NO_MARGINS)
+        self._language_switch_widget.setLayout(language_switch_layout)
+
+        language_switch_layout.addWidget(QtWidgets.QLabel("EN"))
+        # self._language_switch_checkbox = QtWidgets.QPushButton("TEST")
+        self._language_switch_checkbox = _widgets.PillButton("", uses_highlight=False)
+        # self._language_switch_checkbox = _widgets.PillSwitch("", uses_highlight=False)
+        self._language_switch_checkbox.setAutoDefault(False)
+        language_switch_layout.addWidget(self._language_switch_checkbox)
+        language_switch_layout.addWidget(QtWidgets.QLabel("ES"))
+
+        self._translator = QtCore.QTranslator(self)
 
         self._saved_style = ""
 
@@ -218,8 +235,13 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         splitter.addWidget(widget_group_box)
         splitter.setStretchFactor(2, 1)
 
+        title_row_layout = QtWidgets.QHBoxLayout()
+        title_row_layout.addWidget(self.title_label)
+        title_row_layout.addStretch()
+        title_row_layout.addWidget(self._language_switch_widget)
+
         self.setLayout(QtWidgets.QVBoxLayout())
-        self.layout().addWidget(self.title_label)
+        self.layout().addLayout(title_row_layout)
         self.layout().addWidget(splitter)
 
         self._style_apply_button.clicked.connect(self._update_style_from_click)
@@ -233,6 +255,7 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         self._error_checkbox.setChecked(True)
 
         self._refresh_button.clicked.connect(self.refresh)
+        self._language_switch_checkbox.toggled.connect(self._update_language)
         self.resize(500, 800)
 
     def keyPressEvent(self, event):
@@ -505,6 +528,15 @@ class BuscadorDeCosas(QtWidgets.QDialog):
     def _update_error_display(self, checkstate):
         # type: (bool) -> None
         self._error_display = checkstate == QtCore.Qt.Checked
+
+    def _update_language(self, checked):
+        # type: (bool) -> None
+        app = QtWidgets.QApplication.instance()
+        app.removeTranslator(self._translator)
+        if checked:
+            qm_path = os.path.join(os.path.dirname(__file__), "translations", "es.qm")
+            if self._translator.load(qm_path):
+                app.installTranslator(self._translator)
 
     def show(self):
         # type: () -> None
