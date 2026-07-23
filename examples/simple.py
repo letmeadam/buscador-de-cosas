@@ -43,13 +43,29 @@ if __name__ == "__main__":
         textwrap.dedent(
             """\
                 QPushButton:hover {
-                    border: 1px solid transparent;
+                    border: 2px solid transparent;
                     border-radius: 0px;  /* border-color corners aren't very smart */
                     border-color:
-                        qlineargradient(x1:0, y1:0, x2:1, y2:0, stop: 0 red, stop: 0.01 red, stop:0.99 yellow, stop:1 yellow)
-                        qlineargradient(x1:0, y1:0, x2:0, y2:1, stop: 0 yellow, stop:0.01 yellow, stop: 0.99 green, stop:1 green)
-                        qlineargradient(x1:1, y1:0, x2:0, y2:0, stop: 0 green, stop: 0.1 green, stop: 0.99 blue, stop:1 blue)
-                        qlineargradient(x1:0, y1:1, x2:0, y2:0, stop: 0 blue, stop: 0.1 blue, stop: 0.99 red, stop:1 red);
+                        qlineargradient(
+                            x1:0, y1:0, x2:1, y2:0,
+                            stop: 0 hsl(0, 255, 100), stop: 0.01 hsl(0, 255, 100),
+                            stop:0.99 hsl(90, 255, 100), stop:1 hsl(90, 255, 100)
+                        )
+                        qlineargradient(
+                            x1:0, y1:0, x2:0, y2:1,
+                            stop: 0 hsl(90, 255, 100), stop:0.01 hsl(90, 255, 100),
+                            stop: 0.99 hsl(180, 255, 100), stop:1 hsl(180, 255, 100)
+                        )
+                        qlineargradient(
+                            x1:1, y1:0, x2:0, y2:0,
+                            stop: 0 hsl(180, 255, 100), stop: 0.1 hsl(180, 255, 100),
+                            stop: 0.99 hsl(270, 255, 100), stop:1 hsl(270, 255, 100)
+                        )
+                        qlineargradient(
+                            x1:0, y1:1, x2:0, y2:0,
+                            stop: 0 hsl(270, 255, 100), stop: 0.1 hsl(270, 255, 100),
+                            stop: 0.99 hsl(359, 255, 100), stop:1 hsl(359, 255, 100)
+                        );
                     background: qradialgradient(
                         cx: 0.5, cy: 0.5, radius: 1, fx: 0.5, fy: 0.5,
                         stop: 1 palette(base), stop: 0 palette(alternate-base)
