@@ -3,7 +3,7 @@ import textwrap
 from Qt import QtCore, QtWidgets
 
 
-def _create_main_window():
+def create_main_window():
     window = QtWidgets.QMainWindow()
     central_widget = QtWidgets.QWidget()
     window.setCentralWidget(central_widget)
@@ -29,16 +29,11 @@ def _create_main_window():
     return window
 
 
-if __name__ == "__main__":
-    app = QtWidgets.QApplication([])
-    app.setPalette(app.style().standardPalette())
-
-    window = _create_main_window()
-
+def create_main_widget(parent=None):
     # Import now that a QApplication has been established.
     import buscador_de_cosas
 
-    ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=window)
+    ui_debugger = buscador_de_cosas.BuscadorDeCosas(parent=parent)
     ui_debugger.set_style(
         textwrap.dedent(
             """\
@@ -75,6 +70,16 @@ if __name__ == "__main__":
         )
     )
     ui_debugger.refresh()
+    return ui_debugger
+
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication([])
+    app.setPalette(app.style().standardPalette())
+
+    window = create_main_window()
+
+    ui_debugger = create_main_widget(parent=window)
     ui_debugger.select_widget(window.centralWidget())
 
     window.show()
