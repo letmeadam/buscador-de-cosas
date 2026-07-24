@@ -50,6 +50,24 @@ def _recursively_open_persistent_editors(tree_view, parent=None):
                 stack.append(index)
 
 
+def _find_root_widget():
+    # type: () -> typing.Optional[QtWidgets.QWidget]
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        return None
+
+    for widget in app.topLevelWidgets():
+        if widget is None or widget.isHidden():
+            continue
+
+        while widget.parent() is not None:
+            widget = widget.parent()
+
+        return widget
+
+    return None
+
+
 class BuscadorDeCosas(QtWidgets.QDialog):
     _spanish_headers = ("Clase", )
     # type: typing.Iterable[str]
@@ -252,6 +270,18 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         if event.key() != QtCore.Qt.Key_Escape:
             super(BuscadorDeCosas, self).keyPressEvent(event)
 
+    def _resolve_root_widget(self):
+        # type: () -> typing.Optional[QtWidgets.QWidget]
+        global ROOT_WIDGET
+
+        explicit_parent = self.parent()
+        if explicit_parent is not None:
+            ROOT_WIDGET = explicit_parent
+        else:
+            ROOT_WIDGET = _find_root_widget() or self
+
+        return ROOT_WIDGET
+
     @_decorators.cursor_override_decorator()
     def _populate_model(self):
         # type: () -> None
@@ -276,10 +306,11 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         # Recurse through child widgets
         parent_item = tree_model.invisibleRootItem()
 
-        if not self.parent():
+        root_widget = self._resolve_root_widget()
+        if root_widget is None:
             return
 
-        self._recursively_populate_children(parent_item, ROOT_WIDGET)
+        self._recursively_populate_children(parent_item, root_widget)
         self._tree.setModel(tree_model)
         self._tree.selectionModel().selectionChanged.connect(
             self._update_style
