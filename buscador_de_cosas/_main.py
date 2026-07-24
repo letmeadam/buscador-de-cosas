@@ -17,6 +17,17 @@ _USE_SPANISH = False  # type: bool
 ROOT_WIDGET = None  # type: QtWidgets.QWidget
 
 
+def get_root_widget():
+    # type: () -> typing.Optional[QtWidgets.QWidget]
+    return ROOT_WIDGET
+
+
+def set_root_widget(widget):
+    # type: (typing.Optional[QtWidgets.QWidget]) -> None
+    global ROOT_WIDGET
+    ROOT_WIDGET = widget
+
+
 def _recursively_open_persistent_editors(tree_view, parent=None):
     # type: (QtWidgets.QTreeView, QtCore.QModelIndex) -> None
     """
@@ -83,6 +94,9 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         global ROOT_WIDGET
         super(BuscadorDeCosas, self).__init__(parent=parent)
         self.setObjectName("buscadorDeCosa")
+        # Reset to this instance's own sentinel so a fresh instance doesn't
+        # inherit another open instance's already-resolved root on its first
+        # refresh (ROOT_WIDGET is shared across all instances).
         ROOT_WIDGET = self if parent is None else parent
 
         self._error_display = False
@@ -277,7 +291,13 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         explicit_parent = self.parent()
         if explicit_parent is not None:
             ROOT_WIDGET = explicit_parent
-        else:
+            return ROOT_WIDGET
+
+        if ROOT_WIDGET is None or ROOT_WIDGET is self:
+            # A resolved or externally-set ROOT_WIDGET is left untouched so both
+            # a previously-successful auto-detection and a set_root_widget()
+            # override stick across refreshes. If the cached widget is later
+            # destroyed, call set_root_widget(None) to force re-detection.
             ROOT_WIDGET = _find_root_widget() or self
 
         return ROOT_WIDGET
@@ -307,9 +327,6 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         parent_item = tree_model.invisibleRootItem()
 
         root_widget = self._resolve_root_widget()
-        if root_widget is None:
-            return
-
         self._recursively_populate_children(parent_item, root_widget)
         self._tree.setModel(tree_model)
         self._tree.selectionModel().selectionChanged.connect(

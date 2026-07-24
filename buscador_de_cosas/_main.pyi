@@ -5,6 +5,9 @@ from Qt import QtGui, QtWidgets
 
 ROOT_WIDGET: QtWidgets.QWidget
 
+def get_root_widget() -> typing.Optional[QtWidgets.QWidget]: ...
+def set_root_widget(widget: typing.Optional[QtWidgets.QWidget]) -> None: ...
+
 
 class BuscadorDeCosas(QtWidgets.QDialog):
 
