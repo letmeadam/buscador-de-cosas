@@ -26,6 +26,7 @@ def create_main_window():
     sub_layout.addWidget(close_button)
 
     central_widget.setLayout(layout)
+    central_widget.setStyleSheet("QWidget { background: #222222; }")
     return window
 
 
