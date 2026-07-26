@@ -11,6 +11,7 @@ from . import (
     _context_managers,
     _decorators,
     _delegates,
+    _stylesheets,
 )
 
 _USE_SPANISH = False  # type: bool
@@ -180,7 +181,49 @@ class BuscadorDeCosas(QtWidgets.QDialog):
                 """
             )
         )
-        style_group_layout.addWidget(self._style_edit, 1, 0, 1, -1)
+
+        # Row 1 (spans all columns): ancestor stylesheet group box + override
+        # box, stacked with no gaps.
+        text_areas_layout = QtWidgets.QVBoxLayout()
+        text_areas_layout.setContentsMargins(_constants.NO_MARGINS)
+        text_areas_layout.setSpacing(0)
+
+        self._ancestor_stylesheet_group_box = QtWidgets.QGroupBox("Include ancestor stylesheet")
+        self._ancestor_stylesheet_group_box.setCheckable(True)
+        self._ancestor_stylesheet_group_box.setChecked(True)
+        self._ancestor_stylesheet_group_box.setToolTip(
+            "When checked, the ancestor stylesheet below is prepended to the "
+            "override text when applying. Uncheck to apply only the override "
+            "text."
+        )
+
+        ancestor_group_layout = QtWidgets.QVBoxLayout()
+        ancestor_group_layout.setContentsMargins(_constants.NO_MARGINS)
+        ancestor_group_layout.setSpacing(0)
+
+        reset_row_layout = QtWidgets.QHBoxLayout()
+        reset_row_layout.setContentsMargins(_constants.NO_MARGINS)
+
+        self._ancestor_stylesheet_reset_button = QtWidgets.QPushButton("Reset")
+        self._ancestor_stylesheet_reset_button.setToolTip(
+            "Re-collect the selected widget's ancestor stylesheet, overwriting "
+            "any edits made below."
+        )
+        reset_row_layout.addWidget(self._ancestor_stylesheet_reset_button)
+        ancestor_group_layout.addLayout(reset_row_layout)
+
+        self._ancestor_stylesheet_edit = QtWidgets.QTextEdit()
+        self._ancestor_stylesheet_edit.setPlaceholderText(
+            "Click Reset to populate with the selected widget's ancestor stylesheet."
+        )
+        ancestor_group_layout.addWidget(self._ancestor_stylesheet_edit)
+
+        self._ancestor_stylesheet_group_box.setLayout(ancestor_group_layout)
+
+        text_areas_layout.addWidget(self._ancestor_stylesheet_group_box)
+        text_areas_layout.addWidget(self._style_edit)
+
+        style_group_layout.addLayout(text_areas_layout, 1, 0, 1, -1)
         style_group_layout.setRowStretch(1, 1)
 
         # Widget Interaction
@@ -238,6 +281,10 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         self._style_apply_checkbox.setChecked(True)
         self._style_clear_button.clicked.connect(self.clear_style)
         self._style_edit.textChanged.connect(self._update_style)
+
+        self._ancestor_stylesheet_group_box.toggled.connect(self._update_style)
+        self._ancestor_stylesheet_edit.textChanged.connect(self._update_style)
+        self._ancestor_stylesheet_reset_button.clicked.connect(self._reset_ancestor_stylesheet_edit)
 
         self._widget_apply_button.clicked.connect(self._update_widget)
         self._error_checkbox.stateChanged.connect(self._update_error_display)
@@ -391,6 +438,10 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         # type: () -> str
         return self._style_edit.toPlainText()
 
+    def get_ancestor_stylesheet(self):
+        # type: () -> str
+        return self._ancestor_stylesheet_edit.toPlainText()
+
     def refresh(self):
         # type: () -> None
         """Refresh the debugger."""
@@ -421,6 +472,16 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         # type: () -> None
         self._style_apply_checkbox.toggle()
 
+    def reset_ancestor_stylesheet(self):
+        # type: () -> None
+        """Re-collect the selected widget's ancestor stylesheet, overwriting
+        any edits."""
+        self._reset_ancestor_stylesheet_edit()
+
+    def set_include_ancestor_stylesheet(self, include=True):
+        # type: (bool) -> None
+        self._ancestor_stylesheet_group_box.setChecked(include)
+
     def _update_style_from_click(self):
         self._set_style()
 
@@ -441,6 +502,28 @@ class BuscadorDeCosas(QtWidgets.QDialog):
         if self._style_apply_checkbox.checkState():
             self._set_style()
 
+    def _reset_ancestor_stylesheet_edit(self):
+        # type: () -> None
+        indices = [
+            index for index in self._tree.selectedIndexes() if index.column() == 0
+        ]
+        widget = None
+        if indices:
+            item = self._tree.model().itemFromIndex(indices[0])
+            widget = item.data(role=_constants.WIDGET_ROLE)
+
+        entries = _stylesheets.collect_ancestor_stylesheets(widget)
+        self._ancestor_stylesheet_edit.setPlainText(_stylesheets.format_ancestor_stylesheet(entries))
+
+    def _get_style_to_apply(self):
+        # type: () -> str
+        override_text = self._style_edit.toPlainText()
+        if self._ancestor_stylesheet_group_box.isChecked():
+            ancestor_stylesheet_text = self._ancestor_stylesheet_edit.toPlainText()
+            if ancestor_stylesheet_text:
+                return "\n\n".join([ancestor_stylesheet_text, override_text])
+        return override_text
+
     def _set_style(self):
         # type: () -> None
         indices = [
@@ -454,14 +537,11 @@ class BuscadorDeCosas(QtWidgets.QDialog):
 
         self._unset_style()
 
-        try:
-            self.current_widget = item.data(role=_constants.WIDGET_ROLE)
-            if not hasattr(self.current_widget, "styleSheet"):
-                raise AttributeError
+        self.current_widget = item.data(role=_constants.WIDGET_ROLE)
+        self._saved_style = _stylesheets.get_style_sheet(self.current_widget)
+        applied = _stylesheets.set_style_sheet(self.current_widget, self._get_style_to_apply())
 
-            self._saved_style = self.current_widget.styleSheet()
-            self.current_widget.setStyleSheet(self._style_edit.toPlainText())
-        except AttributeError:
+        if not applied:
             if _USE_SPANISH:
                 print(
                     '(set) "{}" no comprende "styleSheet" :('.format(
@@ -479,12 +559,8 @@ class BuscadorDeCosas(QtWidgets.QDialog):
     def _unset_style(self):
         # type: () -> None
         if self.current_widget:
-            try:
-                if not hasattr(self.current_widget, "setStyleSheet"):
-                    raise AttributeError
-
-                self.current_widget.setStyleSheet(self._saved_style)
-            except AttributeError:
+            applied = _stylesheets.set_style_sheet(self.current_widget, self._saved_style)
+            if not applied:
                 if _USE_SPANISH:
                     print(
                         '(unset) "{}" no comprende "styleSheet" :('.format(
@@ -497,9 +573,8 @@ class BuscadorDeCosas(QtWidgets.QDialog):
                             self.current_widget
                         )
                     )
-            finally:
-                self.current_widget = None
-                self._saved_style = ""
+            self.current_widget = None
+            self._saved_style = ""
 
     def _update_widget(self):
         # type: () -> None

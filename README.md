@@ -32,4 +32,12 @@ ui_debugger.select_widget(widget)
 
 # Refresh immediately (some applications take time to fully load)
 ui_debugger.refresh()
+
+# The Style Modification box now has a checkable "Include ancestor
+# stylesheet" group box (checked by default) that holds a "Reset" button
+# and an editable ancestor-stylesheet box, stacked directly above the
+# override box. Unchecking it applies only the override text.
+ui_debugger.reset_ancestor_stylesheet()
+print(ui_debugger.get_ancestor_stylesheet())
+ui_debugger.set_include_ancestor_stylesheet(False)  # apply override text only
 ```
